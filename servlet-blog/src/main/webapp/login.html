@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <div id="app">
+        <h1>用户登录</h1>
+        用户名：<input type="text" v-model="username">
+        <br><br>
+        密码：<input type="password" v-model="password">
+        <br><br>
+        <button @click="login()">登录</button>
+    </div>
+    <!-- 生产环境版本，优化了尺寸和速度 -->
+    <script src="static/vue.js"></script>
+    <script src="static/axios.min.js"></script>
+    <script>
+        var app = new Vue({
+            el: "#app",
+            data: {
+                username: "abc",
+                password: "123"
+            },
+            methods: {
+                login: function () {
+                    // alert("用户名："+this.username+"\n密码："+this.password)
+                    let vm = this;
+                    //发送ajax请求
+                    axios.post("login", {
+                        username: vm.username,
+                        password: vm.password
+                    }).then(function (resp) {
+                        // console.log(resp)
+                        let body = resp.data;
+                        if(body.success){//业务操作成功，跳转到首页
+                            window.location.href = "jsp/articleList.jsp";
+                        }else{//业务操作失败，显示错误信息
+                            alert("错误码："+body.code+"\n错误信息："+body.message)
+                        }
+                    }).catch(function (err) {
+                        console.error(JSON.stringify(err))
+                    })
+                }
+            }
+        });
+    </script>
+</body>
+</html>
