@@ -7,7 +7,7 @@
         <packaging>war</packaging>
       </options>
     </properties>
-    <root id="archive" name="myblog.war">
+    <root id="archive" name="servlet-blog.war">
       <element id="artifact" artifact-name="servlet-blog:war exploded" />
     </root>
   </artifact>
