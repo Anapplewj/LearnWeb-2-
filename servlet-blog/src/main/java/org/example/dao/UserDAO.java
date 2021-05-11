@@ -14,8 +14,8 @@ public class UserDAO {
         String sql="select* from user where username=? and password=?";
         PreparedStatement ps=c.prepareStatement(sql);
         //3. 执行sql语句
-        ps.setString(1,input.getUserName());
-        ps.setString(2,input.getPassWord());
+        ps.setString(1,input.getUsername());
+        ps.setString(2,input.getPassword());
         ResultSet rs=ps.executeQuery();
 
         User query=null;
@@ -23,9 +23,9 @@ public class UserDAO {
         while(rs.next()){
             query=new User();
             query.setId(rs.getInt("id"));
-            query.setUserName(input.getUserName());
-            query.setPassWord(input.getPassWord());
-            query.setNickName(input.getNickName());
+            query.setUsername(input.getUsername());
+            query.setPassword(input.getPassword());
+            query.setNickname(rs.getString("nickname"));
             query.setSex(rs.getBoolean("sex"));
             Timestamp t=rs.getTimestamp("birthday");
             if(t!=null){
@@ -33,10 +33,8 @@ public class UserDAO {
             }
             query.setHead(input.getHead());
         }
-        //5. 释放资源
-        ps.close();
-        rs.close();
-        c.close();
-        return null;
+        //5. 释放资源 TODO
+        DBUtil.close(c, ps, rs);
+        return query;
     }
 }

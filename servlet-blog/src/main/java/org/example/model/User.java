@@ -9,9 +9,9 @@ import lombok.ToString;
 @ToString
 public class User {
     private Integer id;
-    private String userName;
-    private String passWord;
-    private String nickName;
+    private String username;
+    private String password;
+    private String nickname;
     private boolean sex;
     private java.util.Date birthday;
     private String head;
