@@ -12,7 +12,7 @@ import java.sql.SQLException;
 public class UserDao {
     //1.新增用户(注册)
     //把一个User对象插入到数据库中
-    void add(User user) {
+    public void add(User user) {
         //1.获取到数据库连接
         Connection connection = DBUtil.getConnection();
         //2.拼装sql语句

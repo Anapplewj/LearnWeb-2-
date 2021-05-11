@@ -119,14 +119,5 @@ public class ArticleDao {
             DBUtil.close(connection,statement,null);
         }
     }
-
-    public static void main(String[] args) {
-        ArticleDao articleDao=new ArticleDao();
-        Article article=new Article();
-        article.setTitle("i am biaoti");
-        article.setContent("absbcdhfeudhdsidefbjsjaiosfhb............");
-        article.setUserId(1);
-        articleDao.add(article);
-    }
 }
 
