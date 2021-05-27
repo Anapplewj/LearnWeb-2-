@@ -1,0 +1,17 @@
+drop database if exists MyChess2;
+create database MyChess2 character set utf8mb4;
+
+use MyChess2;
+
+create table room(
+    id int primary key,
+    foreign key(user_id) references user(id)
+);
+
+create table user(
+    id int primary key auto_increment,
+    username varchar(20) not null unique comment '账号',
+    password varchar(20) not null
+    points int,
+    room_id varchar(20)
+);

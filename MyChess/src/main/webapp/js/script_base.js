@@ -37,7 +37,7 @@ function setScreenText(me) {
 //////////////////////////////////////////////////
 // 初始化 websocket
 //////////////////////////////////////////////////
-var websocket = new WebSocket('ws://1.14.164.161:8080/game/' + gameInfo.userId);
+var websocket = new WebSocket('ws://1.14.164.161:8080/MyChess/game/' + gameInfo.userId);
 
 websocket.onopen = function () {
     console.log("建立连接!");
