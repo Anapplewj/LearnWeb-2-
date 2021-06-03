@@ -53,7 +53,7 @@ public class Room {
         //1.将子放到棋盘上
         //位置就是request中的row,col
         //放黑子白子,按照request中的用户的userId
-        int chess=request.getUserId()==userId1?1:2;
+        int chess=request.getUserId()==userId1?userId1:userId2;
         int row=request.getRow();
         int col=request.getCol();
         if(chessBoard[row][col]!=0){
