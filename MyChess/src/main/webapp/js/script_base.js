@@ -135,7 +135,7 @@ function initGame() {
     context.strokeStyle = "#BFBFBF";
     // 背景图片
     var logo = new Image();
-    logo.src = "images/huaban.jpg";
+    logo.src = "images/lemon.webp";
     logo.onload = function () {
         context.drawImage(logo, 0, 0, 450, 450);
         initChessBoard();

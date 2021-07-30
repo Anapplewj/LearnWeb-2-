@@ -18,7 +18,7 @@ gameInfo = {
 function onClick(userId) {
     startMatch(userId);
     // 将按钮设置为不可点击, 并修改文本
-    $("#matchButton").attr('disabled',true);
+    $("#matchButton").attr('disabled', true);
     $("#matchButton").text("匹配中...");
 }
 
@@ -35,78 +35,85 @@ function setScreenText(me) {
 }
 
 //////////////////////////////////////////////////
-// 初始化 websocket TODO
+// 初始化 websocket
 //////////////////////////////////////////////////
-var webSocket=new WebSocket('ws://127.0.0.1:8080/game/'+gameInfo.userId);
+var websocket = new WebSocket('ws://1.14.164.161:8080/MyChess2/game/' + gameInfo.userId);
 
-webSocket.onopen=function () {
+websocket.onopen = function () {
     console.log("建立连接!");
 }
 
-webSocket.onclose=function () {
+websocket.onclose = function () {
     console.log("断开连接!");
 }
 
-webSocket.onerror=function(){
+websocket.onerror = function () {
     console.log("连接异常!");
 }
 
-//在不同的流程中的处理方式不同,匹配的请求和落子的请求需要分开处理.
-webSocket.onmessage=function (event) {
+// 一会要在不同的流程中进行不同的处理
+// 匹配流程和落子流程处理方式不一样
+websocket.onmessage = function (event) {
     var message=event.data;
-    if(message=='duplicationLogin'){
-        //该用户已经登录过了
-        alert("您的账号已经被登录过了");
-        $("#matchButton").attr('disabled',true);
+    if(message=='duplicationLogin!'){
+        //用户已经登录过了
+        alert("您的账号已经被登录过了!");
+        //强制刷新
+        window.location.reload();
+        $("#matchButton").attr('disabled', true);
         $("#screen").text("您的账号已经被登录过了!");
     }
 }
 
-//DOM API
-window.onbeforeunload=function () {
-    //页面关闭之前,先主动关闭websocket
-    webSocket.close();
+// DOM API 前端程序猿要非常熟悉. 后端不需要
+window.onbeforeunload = function () {
+    // 页面关闭之前, 先主动关闭 websocket
+    websocket.close();
 }
+
 //////////////////////////////////////////////////
-// 实现匹配逻辑 TODO
+// 实现匹配逻辑
 //////////////////////////////////////////////////
 
-//用户点击开始匹配按钮,就会进行匹配
-// 这个按钮就是在匹配按钮的点击回调函数中进行调用的
-
-function startMatch(userId){
-    var message={
-        //在js中操作json是不需要加上引号的
-        type:"startMatch",
-        userId:'userId'
+// 用户点击 "开始匹配按钮", 就会开始进行匹配
+// 这个函数就是在匹配按钮的点击回调中进行调用的.
+function startMatch(userId) {
+    var message = {
+        // 在 JS 中操作 JSON 是不需要给 key 加上引号的
+        type: "startMatch",
+        userId: userId
     };
-    //通过下面这个函数,来处理服务器返回的匹配响应
-    webSocket.onmessage=handlerStartMatch;
-    //将js对象,转成JSON格式的字符串
-    webSocket.send(JSON.stringify(message));
+    // 通过下面的这个函数来处理服务器返回的匹配响应
+    websocket.onmessage = handlerStartMatch;
+    // JSON.stringify 把一个 JS 对象转成 JSON 格式的字符串.
+    // 和 Gson.toJson 是同样性质的操作
+    // JS 中如何把 JSON 格式的字符串转成 JS 对象呢?
+    // JSON.parse
+    websocket.send(JSON.stringify(message));
 }
 
-//当客户端收到服务端处理的匹配请求的响应结果时,就会自动调用
-//webSocket.onmessage=hendlerStartMatch;
-function handlerStartMatch(event){
-    //1.先把服务器响应的数据取出,并解析成js对象
-    console.log("handlerStartMatch: "+event.data);
-    var response=JSON.parse(event.data);
-    if(response.type!='startMatch'){
-        console.log("handlerStartMatch: 无效的响应! type:"+response.type);
+// 这个函数用来处理匹配响应. 当客户端收到服务器的返回结果的时候
+// 就会自动被调用 websocket.onmessage = handlerStartMatch; 相关
+function handlerStartMatch(event) {
+    // 1. 先把服务器响应的数据给取出并解析成 JS 对象
+    console.log("handlerStartMatch: " + event.data);
+    var response = JSON.parse(event.data);
+    if (response.type != 'startMatch') {
+        console.log("handlerStartMatch: 无效的响应! type: " + response.type);
         return;
     }
-    //2.从响应中得到了一些信息,房间id和是否先手
-    gameInfo.isWhite=response.isWhite;
-    gameInfo.roomId=response.roomId;
-    gameInfo.userId=response.userId;
-    //3.隐藏匹配按钮
+    // 2. 从响应中得到了一些信息. 房间id和是否是先手
+    gameInfo.isWhite = response.isWhite;
+    gameInfo.roomId = response.roomId;
+    gameInfo.otherUserId = response.otherUserId;
+    // 3. 隐藏匹配按钮
     hideMatchButton();
-    //4.设置提示信息,并且提示当前该谁落子了
+    // 4. 设置提示信息(提示当前是轮到谁落子)
     setScreenText(gameInfo.isWhite);
-    //5.初始化棋盘
+    // 5. 初始化棋盘
     initGame();
 }
+
 //////////////////////////////////////////////////
 // 匹配成功, 则初始化一局游戏
 //////////////////////////////////////////////////
@@ -128,7 +135,7 @@ function initGame() {
     context.strokeStyle = "#BFBFBF";
     // 背景图片
     var logo = new Image();
-    logo.src = "images/background.jpg";
+    logo.src = "images/1.jpg";
     logo.onload = function () {
         context.drawImage(logo, 0, 0, 450, 450);
         initChessBoard();
@@ -147,6 +154,7 @@ function initGame() {
     }
 
     // 绘制一个棋子, me 为 true
+    // i 表示列, j 表示行
     function oneStep(i, j, isWhite) {
         context.beginPath();
         context.arc(15 + i * 30, 15 + j * 30, 13, 0, 2 * Math.PI);
@@ -177,14 +185,74 @@ function initGame() {
         var row = Math.floor(y / 30);
         if (chessBoard[row][col] == 0) {
             // TODO 新增发送数据给服务器的逻辑
-            oneStep(col, row, gameInfo.isWhite);
-            chessBoard[row][col] = 1;
+            send(row, col);
+
+            // oneStep(col, row, gameInfo.isWhite);
+            // chessBoard[row][col] = 1;
             // 通过这个语句控制落子轮次
             // me = !me;
         }
     }
 
-    // TODO 新增处理服务器返回数据的请求
-    //      并绘制棋子, 以及判定胜负
+    // 发送落子的请求
+    function send(row, col) {
+        console.log("send: " + row + "," + col);
+        // 构造一个落子请求对象
+        var request = {
+            type: "putChess",
+            userId: gameInfo.userId,
+            roomId: gameInfo.roomId,
+            row: row,
+            col: col,
+        };
+        websocket.send(JSON.stringify(request));
+    }
+
+    // 新增处理服务器返回数据的请求
+    // 并绘制棋子, 以及判定胜负
+    function handlerPutChess(event) {
+        console.log("handlerPutChess: " + event.data);
+        // 1. 把收到的响应数据转成 JS 对象
+        var response = JSON.parse(event.data);
+        if (response.type != "putChess") {
+            console.log("handlerChess: 无效的响应类型! type: " + response.type);
+            return;
+        }
+        // 2. 根据响应对象中 userId 字段来判定一下这个棋子是自己落的还是对方落的
+        if (response.userId == gameInfo.userId) {
+            // 自己落的子
+            // 当前玩家自己的黑白子的情况在 gameInfo.isWhite 中记录呢
+            oneStep(response.col, response.row, gameInfo.isWhite);
+        } else {
+            // 对方落的子
+            oneStep(response.col, response.row, !gameInfo.isWhite);
+        }
+        // 3. 给本地的棋盘设置一个标记, 防止同一个位置出现重复落子的情况
+        //    本地的棋盘不需要关注 "胜负", 胜负是服务器计算的
+        //    本地棋盘只需要防止同一个位置被重复落子即可
+        //    就简单约定, 已经有子的地方设为 1, 未落子的地方设为 0
+        chessBoard[response.row][response.col] = 1;
+        // 4. 切换双方的落子顺序
+        me = !me;
+        // 5. 更新界面, 提示由谁来落子
+        setScreenText(me);
+        // 6. 判定游戏是否结束. 服务器已经计算好了, 已经返回给浏览器了
+        if (response.winner != 0) {
+            // 胜负已分.
+            if (response.winner == gameInfo.userId) {
+                // 自己获胜了
+                alert("你赢了!");
+            } else {
+                // 对方获胜了
+                alert("你输了!");
+            }
+            // 就要开始下一局游戏了
+            // 此处使用一种偷懒的方式来实现, 直接刷新页面
+            window.location.reload();
+        }
+    }
+
+    websocket.onmessage = handlerPutChess;
 }
 
+// initGame();
